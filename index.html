@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CrossianXprep</title>
+    <title>CrossianXprep - Full</title>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -104,85 +104,17 @@
 
     <script type="text/babel">
         // ============================================
-        // GAME DATA ROOT CONSTANT
-        // ============================================
-        const GAME_DATA = {
-            chapters: [
-                {
-                    id: 1,
-                    title: "Ch.1 — Linear Equations",
-                    badge: "Algebria Conqueror 🏆",
-                    story: "In the kingdom of Algebria, two merchants are hiding secrets. Merchant X has twice the gold of Merchant Y. Together they carry 90 coins. Your quest: uncover their secrets using the ancient art of Linear Equations.",
-                    concepts: [
-                        {
-                            title: "What is a Linear Equation?",
-                            body: "An equation with two unknown values representing a straight line on a graph.",
-                            example: "2x + 3y = 12",
-                            emoji: "📜"
-                        },
-                        {
-                            title: "Graphical Method",
-                            body: "Every equation forms a straight line. The single point where two lines cross is the solution.",
-                            example: "Intersection = (X, Y)",
-                            emoji: "📈"
-                        },
-                        {
-                            title: "Substitution Method",
-                            body: "Isolate one variable in the first equation, then substitute it into the second.",
-                            example: "x = 4 - y → 2(4-y) + y = 7",
-                            emoji: "🔄"
-                        },
-                        {
-                            title: "Elimination Method",
-                            body: "Add or subtract the two equations to completely eliminate one of the variables.",
-                            example: "(x+y=10) + (x-y=4) → 2x=14",
-                            emoji: "⚔️"
-                        }
-                    ],
-                    miniChallenges: [
-                        { q: "If x + y = 10 and x - y = 4, what is x?", options: ["3", "7", "5", "8"], a: 1 },
-                        { q: "Which method eliminates a variable by adding two equations?", options: ["Substitution", "Graphical", "Elimination", "Factoring"], a: 2 },
-                        { q: "Two lines on a graph intersect at one point. This means the system has:", options: ["No solution", "Infinite solutions", "One unique solution", "Two solutions"], a: 2 }
-                    ],
-                    boss: {
-                        name: "The Equation Beast",
-                        maxHp: 100,
-                        ascii: `   2x+3y=12 \n  4x      5y \n          6x \n        3y   \n      5x     \n      --     \n      2y     `,
-                        questions: [
-                            { q: "Solve: 2x + y = 7 and x + y = 4. Find x.", options: ["1", "2", "3", "4"], a: 2 },
-                            { q: "If 3x - 2y = 4 and x = 2, find y.", options: ["1", "2", "3", "4"], a: 0 },
-                            { q: "Two lines are parallel. The system has:", options: ["One solution", "No solution", "Infinite solutions", "Two solutions"], a: 1 },
-                            { q: "The substitution method works by:", options: ["Adding equations", "Graphing both lines", "Replacing one variable", "Multiplying equations"], a: 2 },
-                            { q: "Solve: x + 2y = 8 and 2x + 4y = 16. These lines are:", options: ["Intersecting", "Parallel", "The same line", "Perpendicular"], a: 2 }
-                        ]
-                    }
-                }
-            ]
-        };
-
-        // ============================================
         // SOUND MANAGER
         // ============================================
-        const MUTE_AUDIO = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; // Base64 Silent blip placeholder
-        const SOUND_URLS = {
-            click: MUTE_AUDIO,
-            correct: MUTE_AUDIO,
-            wrong: MUTE_AUDIO,
-            hit: MUTE_AUDIO,
-            damage: MUTE_AUDIO,
-            win: MUTE_AUDIO
-        };
+        const MUTE_AUDIO = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; 
+        const SOUND_URLS = { click: MUTE_AUDIO, correct: MUTE_AUDIO, wrong: MUTE_AUDIO, hit: MUTE_AUDIO, damage: MUTE_AUDIO, win: MUTE_AUDIO };
         
         let sounds = {};
         const initAudio = () => {
             if (Object.keys(sounds).length) return;
-            Object.keys(SOUND_URLS).forEach(key => {
-                sounds[key] = new Howl({ src: [SOUND_URLS[key]], volume: 0.6 });
-            });
+            Object.keys(SOUND_URLS).forEach(key => { sounds[key] = new Howl({ src: [SOUND_URLS[key]], volume: 0.6 }); });
         };
-        const playSFX = (name) => {
-            if (sounds[name]) sounds[name].play();
-        };
+        const playSFX = (name) => { if (sounds[name]) sounds[name].play(); };
 
         // ============================================
         // REACT COMPONENTS
@@ -190,20 +122,25 @@
         const { useState, useEffect, useRef, useMemo } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // --- Common UI Components ---
-        const Button = ({ children, onClick, variant = 'primary', className = '', ...props }) => {
+        const Button = ({ children, onClick, variant = 'primary', className = '', disabled, ...props }) => {
             const base = "font-pixel py-3 px-4 transition-transform active:scale-95 duration-100 flex justify-center items-center text-[10px] md:text-xs text-center leading-loose";
-            const variants = {
-                primary: "bg-accentp text-white pixel-border-accent hover:brightness-110",
-                secondary: "bg-cardsfc text-textm border-2 border-accentp hover:bg-white/10",
-                danger: "bg-wrong text-white pixel-border hover:brightness-110 shadow-[0_0_15px_rgba(239,68,68,0.5)]",
-                success: "bg-correct text-white pixel-border hover:brightness-110 shadow-[0_0_15px_rgba(16,185,129,0.5)]",
-            };
+            let vClass = "";
+            if (disabled) vClass = "bg-gray-700 text-gray-400 pixel-border opacity-50 cursor-not-allowed";
+            else {
+                const variants = {
+                    primary: "bg-accentp text-white pixel-border-accent hover:brightness-110",
+                    secondary: "bg-cardsfc text-textm border-2 border-accentp hover:bg-white/10",
+                    danger: "bg-wrong text-white pixel-border hover:brightness-110 shadow-[0_0_15px_rgba(239,68,68,0.5)]",
+                    success: "bg-correct text-white pixel-border hover:brightness-110 shadow-[0_0_15px_rgba(16,185,129,0.5)]",
+                };
+                vClass = variants[variant];
+            }
             return (
                 <button 
-                    className={`${base} ${variants[variant]} ${className}`} 
-                    onClick={(e) => { playSFX('click'); onClick && onClick(e); }}
+                    className={`${base} ${vClass} ${className}`} 
+                    onClick={(e) => { if(!disabled){ playSFX('click'); onClick && onClick(e); } }}
                     {...props}
+                    disabled={disabled}
                 >
                     {children}
                 </button>
@@ -221,39 +158,109 @@
                 <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
                     {pieces.map((p, i) => (
                         <div key={i} className="absolute w-2 h-4 rounded-sm" 
-                             style={{
-                                 left: `${p.l}vw`,
-                                 animation: `confetti-fall ${p.duration}s linear ${p.d}s infinite`,
-                                 backgroundColor: p.c
-                             }}
+                             style={{ left: `${p.l}vw`, animation: `confetti-fall ${p.duration}s linear ${p.d}s infinite`, backgroundColor: p.c }}
                         />
                     ))}
                 </div>
             )
         };
 
-        // --- Scene 0: Splash Screen ---
-        const SplashScene = ({ onStart }) => (
-            <motion.div 
-                className="flex flex-col items-center justify-center h-full text-center p-4 bg-appbg relative"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            >
+        // --- Mapper Function ---
+        const mapRawToGame = (rawChapter) => {
+            return {
+                title: `Ch.${rawChapter.number} — ${rawChapter.title}`,
+                badge: rawChapter.badge || "Scholar",
+                story: rawChapter.cutscene || rawChapter.quest_title || "Ready your mind for battle!",
+                concepts: rawChapter.concepts.map(c => ({
+                    title: c.title,
+                    body: c.explanation,
+                    example: c.example || c.formula || "Important concept to remember.",
+                    emoji: c.icon || "📚"
+                })),
+                miniChallenges: rawChapter.mini_challenges.map(m => ({
+                    q: m.question,
+                    options: m.options,
+                    a: m.correct_index
+                })),
+                boss: {
+                    name: rawChapter.boss_name || "The Final Exam",
+                    maxHp: 100,
+                    ascii: `   \\(•_•)/ \n    (   )\n    /   \\  `,
+                    questions: rawChapter.boss_questions.map(m => ({
+                        q: m.question,
+                        options: m.options,
+                        a: m.correct_index
+                    }))
+                }
+            };
+        };
+
+        // --- Core Scenes (UI unchanged from index.html) ---
+        const SplashScene = ({ onStart, loadingError, isLoading }) => (
+            <motion.div className="flex flex-col items-center justify-center h-full text-center p-4 bg-appbg relative" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="absolute inset-0 bg-pattern opacity-[0.05] pointer-events-none z-0"></div>
                 <div className="z-10 flex flex-col items-center">
-                    <motion.h1 
-                        className="font-pixel text-2xl md:text-5xl text-accentg mb-6 mt-12 leading-loose drop-shadow-md anim-float"
-                    >
+                    <motion.h1 className="font-pixel text-2xl md:text-5xl text-accentg mb-6 mt-12 leading-loose drop-shadow-md anim-float">
                         CROSSIANS<br/><span className="text-accentp text-xl md:text-4xl">X</span><br/>PREP
                     </motion.h1>
                     <div className="font-pixel text-textm text-[10px] md:text-sm mb-16 opacity-80 uppercase tracking-widest">
-                        Maths World Quest
+                        Ultimate Board Exam Quest
                     </div>
-                    <Button onClick={onStart} className="animate-pulse px-8 py-5 text-sm shadow-[0_0_20px_rgba(124,58,237,0.5)]">PRESS START</Button>
+                    
+                    {isLoading && <div className="text-accentg animate-pulse font-pixel text-xs">Loading gamedata.json...</div>}
+                    
+                    {loadingError && (
+                        <div className="text-wrong bg-wrong/20 p-4 border border-wrong rounded pixel-border mb-4 max-w-sm">
+                            <p className="font-body text-sm font-bold mb-2">Failed to load gamedata.json</p>
+                            <p className="font-body text-xs">If you are opening this file directly (file://), your browser might block loading the JSON due to CORS. Please use a local server like Live Server or VSCode Live Preview.</p>
+                        </div>
+                    )}
+
+                    {!isLoading && !loadingError && (
+                        <Button onClick={onStart} className="animate-pulse px-8 py-5 text-sm shadow-[0_0_20px_rgba(124,58,237,0.5)]">CHOOSE QUEST</Button>
+                    )}
                 </div>
             </motion.div>
         );
 
-        // --- Scene 1: Cutscene ---
+        const MenuScene = ({ data, onSelectChapter }) => {
+            const [selSubId, setSelSubId] = useState(data.subjects[0]?.id || "");
+            
+            const activeSubject = data.subjects.find(s => s.id === selSubId);
+
+            return (
+                <motion.div className="flex flex-col items-center justify-start h-full p-4 relative w-full max-w-4xl mx-auto overflow-y-auto no-scrollbar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <h2 className="font-pixel text-accentg text-sm md:text-lg my-8 drop-shadow text-center">SELECT YOUR PATH</h2>
+                    
+                    <select 
+                        className="bg-cardsfc text-textm font-pixel text-[10px] p-3 rounded pixel-border-accent outline-none mb-8 w-full max-w-md shadow-lg"
+                        value={selSubId}
+                        onChange={e => setSelSubId(e.target.value)}
+                    >
+                        {data.subjects.map(s => <option key={s.id} value={s.id}>{s.name || s.id}</option>)}
+                    </select>
+
+                    {activeSubject && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full pb-16">
+                            {activeSubject.chapters.map(ch => (
+                                <motion.div key={ch.id} whileHover={{ scale: 1.05 }} className="bg-cardsfc border-2 border-accentp p-4 rounded flex flex-col justify-between shadow-xl cursor-pointer" onClick={() => onSelectChapter(ch)}>
+                                    <div>
+                                        <div className="font-pixel text-accentg text-[10px] mb-2 uppercase">Ch. {ch.number}</div>
+                                        <h3 className="font-body font-bold text-lg mb-4">{ch.title}</h3>
+                                        <p className="font-body text-xs opacity-70 italic line-clamp-2">{ch.quest_title || "Unlock the mysteries."}</p>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
+                                        <span className="font-pixel text-[8px] text-correct">LVL UP +100XP</span>
+                                        <span className="bg-accentp text-[8px] px-2 py-1 rounded font-pixel">PLAY</span>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
+                </motion.div>
+            )
+        };
+
         const CutsceneScene = ({ text, onNext }) => {
             const [disp, setDisp] = useState("");
             const [done, setDone] = useState(false);
@@ -270,7 +277,7 @@
                         setDone(true);
                         clearInterval(int);
                     }
-                }, 40);
+                }, 30);
                 return () => clearInterval(int);
             }, [text]);
 
@@ -291,9 +298,10 @@
             );
         };
 
-        // --- Scene 2: Concepts ---
         const ConceptsScene = ({ concepts, onNext }) => {
             const [idx, setIdx] = useState(0);
+            if (!concepts || concepts.length === 0) return <Button onClick={onNext}>Skip</Button>;
+
             return (
                 <motion.div className="flex flex-col items-center justify-center h-full p-4 w-full max-w-lg mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                     <AnimatePresence mode="wait">
@@ -313,7 +321,7 @@
                     </AnimatePresence>
                     
                     <div className="flex justify-between items-center w-full mt-8">
-                        <Button variant="secondary" onClick={() => setIdx(Math.max(0, idx-1))} className={idx === 0 ? "invisible" : ""}>&larr; Prev</Button>
+                        <Button variant="secondary" onClick={() => setIdx(Math.max(0, idx-1))} disabled={idx === 0}>&larr; Prev</Button>
                         <div className="flex gap-2">
                             {concepts.map((_, i) => (
                                 <div key={i} className={`w-2 h-2 rounded-full transition-colors ${i === idx ? 'bg-accentg' : 'bg-white/20'}`} />
@@ -329,7 +337,6 @@
             );
         };
 
-        // --- Scene 3 & 4 Shared: Floating Text Particle ---
         const FloatingText = ({ text, color, x, y, onComplete }) => (
             <motion.div 
                 className="fixed font-pixel text-base md:text-xl z-50 pointer-events-none w-32 -ml-16 text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
@@ -343,12 +350,15 @@
             </motion.div>
         );
 
-        // --- Scene 3: Mini Challenges ---
         const MiniChallengeScene = ({ challenges, onComplete, addXp }) => {
             const [qIdx, setQIdx] = useState(0);
             const [floats, setFloats] = useState([]);
             const [shake, setShake] = useState(false);
             const [selIdx, setSelIdx] = useState(null);
+
+            if (!challenges || challenges.length === 0) {
+                setTimeout(onComplete, 500); return <div>Loading...</div>;
+            }
 
             const q = challenges[qIdx];
 
@@ -409,20 +419,23 @@
             );
         };
 
-        // --- Scene 4: Boss Fight ---
         const BossFightScene = ({ boss, onWin, onLose, addXp, playerHp, setPlayerHp, maxPlayerHp }) => {
             const [qIdx, setQIdx] = useState(0);
             const [bossHp, setBossHp] = useState(boss.maxHp);
             const [animState, setAnimState] = useState(''); 
             const [floats, setFloats] = useState([]);
             const [selIdx, setSelIdx] = useState(null);
+
+            if (!boss || !boss.questions || boss.questions.length === 0) {
+                 setTimeout(onWin, 500); return <div>Loading...</div>;
+            }
             
             const dmgAmt = boss.maxHp / boss.questions.length; 
 
             const handleAnswer = (e, i) => {
                 if (selIdx !== null) return; 
                 setSelIdx(i);
-                const rect = e.target.getBoundingClientRect();
+                
                 const q = boss.questions[qIdx];
 
                 if (i === q.a) {
@@ -431,7 +444,7 @@
                     setBossHp(prev => Math.max(0, prev - dmgAmt));
                     addXp(20);
                     const fid = Date.now();
-                    setFloats(p => [...p, { id: fid, text: `-${dmgAmt} HP`, color: '#f59e0b', x: window.innerWidth/2, y: window.innerHeight/3 }]);
+                    setFloats(p => [...p, { id: fid, text: `-${Math.round(dmgAmt)} HP`, color: '#f59e0b', x: window.innerWidth/2, y: window.innerHeight/3 }]);
                     setTimeout(() => setAnimState(''), 500);
                 } else {
                     playSFX('damage');
@@ -497,8 +510,7 @@
             );
         };
 
-        // --- Scene 5: Reward Screen ---
-        const RewardScene = ({ xp, isWin, onRestart, chapterMap }) => {
+        const RewardScene = ({ xp, isWin, onRestart, chapterMap, onMenu }) => {
             useEffect(() => { if (isWin) playSFX('win'); }, [isWin]);
             
             if (!isWin) {
@@ -507,9 +519,12 @@
                          <div className="text-6xl mb-6 anim-float grayscale text-center">💀</div>
                          <h1 className="font-pixel text-wrong text-xl md:text-3xl mb-4 text-center">GAME OVER</h1>
                          <p className="font-body mb-8 opacity-80 text-center max-w-sm text-sm md:text-base">
-                             The Equation Beast outsmarted you. Review the concepts and try again!
+                             {chapterMap?.boss?.name || "The Boss"} outsmarted you. Review the concepts and try again!
                          </p>
-                         <Button onClick={onRestart}>Revive & Retry</Button>
+                         <div className="flex gap-4">
+                            <Button variant="secondary" onClick={onMenu}>Exit to Menu</Button>
+                            <Button onClick={onRestart}>Revive & Retry</Button>
+                         </div>
                      </motion.div>
                  );
             }
@@ -521,8 +536,8 @@
             return (
                 <motion.div className="flex flex-col items-center justify-center h-full p-4 text-center z-20 relative bg-appbg/50" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
                     <Confetti />
-                    <h1 className="font-pixel text-accentg text-lg md:text-3xl mb-3 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">CHAPTER COMPLETE!</h1>
-                    <div className="font-body font-bold text-lg md:text-xl mb-8 opacity-90">You Mastered:<br/><span className="text-accentp">{chapterMap.title}</span></div>
+                    <h1 className="font-pixel text-accentg text-lg md:text-3xl mb-3 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">QUEST COMPLETE!</h1>
+                    <div className="font-body font-bold text-lg md:text-xl mb-8 opacity-90">You Mastered:<br/><span className="text-accentp">{chapterMap?.title}</span></div>
                     
                     <div className="flex gap-4 mb-8 text-4xl md:text-6xl drop-shadow-lg">
                         {[1,2,3].map(s => (
@@ -540,23 +555,21 @@
                             <span className="font-pixel text-correct text-sm">{xp}</span>
                         </div>
                         <div className="flex justify-between items-center bg-black/40 p-3 rounded border border-white/5">
-                            <span className="font-bold text-sm md:text-base font-body">Badge Unlocked:</span>
-                            <span className="text-[10px] md:text-xs font-pixel text-accentg drop-shadow">{chapterMap.badge}</span>
+                            <span className="font-bold text-sm md:text-base font-body">Badge:</span>
+                            <span className="text-[10px] md:text-xs font-pixel text-accentg drop-shadow">{chapterMap?.badge}</span>
                         </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-4 w-full max-w-md mt-4">
-                        <Button variant="secondary" onClick={onRestart} className="flex-1 text-[10px] py-4">Play Again</Button>
-                        <Button className="flex-1 opacity-50 cursor-not-allowed group relative py-4" onClick={() => {}} title="Coming Soon">
-                            Next Chapter &rarr;
-                            <span className="absolute -top-10 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-[10px] px-2 py-1 rounded">Coming Soon</span>
+                        <Button variant="secondary" onClick={onRestart} className="flex-1 text-[10px] py-4">Replay</Button>
+                        <Button className="flex-1 py-4" onClick={onMenu}>
+                            Return to Menu &rarr;
                         </Button>
                     </div>
                 </motion.div>
             );
         };
 
-        // --- HUD Components ---
         const HUD = ({ chapterTitle, xp, playerHp, maxPlayerHp }) => (
             <motion.header initial={{ y: -50 }} animate={{ y: 0 }} className="flex-none p-3 md:p-4 flex flex-col md:flex-row justify-between items-center z-30 gap-3 border-b border-white/10 bg-appbg/95 shadow-lg relative">
                 <div className="flex items-center justify-between w-full md:w-auto">
@@ -580,12 +593,15 @@
             </motion.header>
         );
 
-        // --- Main App Logic ---
+        // --- Main Launcher ---
         const App = () => {
-            const chapter = GAME_DATA.chapters[0];
             const MAX_HP = 100;
+            const [scene, setScene] = useState(0); // 0=splash, 0.5=menu, 1=story, 2=learn, 3=mini, 4=boss, 5=end
             
-            const [scene, setScene] = useState(0); 
+            const [gamedata, setGamedata] = useState(null);
+            const [loadingError, setLoadingError] = useState(false);
+            const [activeChapter, setActiveChapter] = useState(null);
+            
             const [xp, setXp] = useState(0);
             const [playerHp, setPlayerHp] = useState(MAX_HP);
             const [isWin, setIsWin] = useState(true);
@@ -595,10 +611,30 @@
                     const savedXP = localStorage.getItem('cxp_total_xp_v1');
                     if (savedXP) setXp(parseInt(savedXP, 10));
                 } catch(e) {}
+                
+                // Fetch JSON automatically on boot
+                fetch('gamedata.json')
+                    .then(res => {
+                        if (!res.ok) throw new Error("HTTP error " + res.status);
+                        return res.json();
+                    })
+                    .then(data => {
+                        setGamedata(data);
+                    })
+                    .catch(err => {
+                        console.error('Failed to load JSON:', err);
+                        setLoadingError(true);
+                    });
             }, []);
 
-            const startGame = () => {
+            const startGameMenu = () => {
                 initAudio();
+                setScene(0.5);
+            };
+
+            const handleSelectChapter = (rawChap) => {
+                setActiveChapter(mapRawToGame(rawChap));
+                setPlayerHp(MAX_HP);
                 setScene(1);
             };
 
@@ -610,33 +646,28 @@
                 });
             };
 
-            const handleBossWin = () => {
-                setIsWin(true);
-                setScene(5);
-            };
-
-            const handleBossLose = () => {
-                setIsWin(false);
-                setScene(5);
-            };
-
             const restartSession = () => {
                 setPlayerHp(MAX_HP);
                 setScene(1);
             };
 
+            const returnToMenu = () => {
+                setScene(0.5);
+            }
+
             return (
                 <div className="h-full w-full flex flex-col overflow-hidden relative selection:bg-accentp/30">
-                    {scene > 0 && <HUD chapterTitle={chapter.title} xp={xp} playerHp={playerHp} maxPlayerHp={MAX_HP} />}
+                    {scene >= 1 && <HUD chapterTitle={activeChapter?.title} xp={xp} playerHp={playerHp} maxPlayerHp={MAX_HP} />}
                     
                     <main className="flex-1 relative overflow-y-auto overflow-x-hidden no-scrollbar">
                         <AnimatePresence mode="wait">
-                            {scene === 0 && <SplashScene key="s0" onStart={startGame} />}
-                            {scene === 1 && <CutsceneScene key="s1" text={chapter.story} onNext={() => setScene(2)} />}
-                            {scene === 2 && <ConceptsScene key="s2" concepts={chapter.concepts} onNext={() => setScene(3)} />}
-                            {scene === 3 && <MiniChallengeScene key="s3" challenges={chapter.miniChallenges} addXp={addXp} onComplete={() => setScene(4)} />}
-                            {scene === 4 && <BossFightScene key="s4" boss={chapter.boss} onWin={handleBossWin} onLose={handleBossLose} addXp={addXp} playerHp={playerHp} setPlayerHp={setPlayerHp} maxPlayerHp={MAX_HP} />}
-                            {scene === 5 && <RewardScene key="s5" xp={xp} isWin={isWin} onRestart={restartSession} chapterMap={chapter} />}
+                            {scene === 0 && <SplashScene key="s0" onStart={startGameMenu} isLoading={!gamedata && !loadingError} loadingError={loadingError} />}
+                            {scene === 0.5 && <MenuScene key="s05" data={gamedata} onSelectChapter={handleSelectChapter} />}
+                            {scene === 1 && <CutsceneScene key="s1" text={activeChapter?.story} onNext={() => setScene(2)} />}
+                            {scene === 2 && <ConceptsScene key="s2" concepts={activeChapter?.concepts} onNext={() => setScene(3)} />}
+                            {scene === 3 && <MiniChallengeScene key="s3" challenges={activeChapter?.miniChallenges} addXp={addXp} onComplete={() => setScene(4)} />}
+                            {scene === 4 && <BossFightScene key="s4" boss={activeChapter?.boss} onWin={() => { setIsWin(true); setScene(5); }} onLose={() => { setIsWin(false); setScene(5); }} addXp={addXp} playerHp={playerHp} setPlayerHp={setPlayerHp} maxPlayerHp={MAX_HP} />}
+                            {scene === 5 && <RewardScene key="s5" xp={xp} isWin={isWin} onRestart={restartSession} chapterMap={activeChapter} onMenu={returnToMenu} />}
                         </AnimatePresence>
                     </main>
                 </div>
